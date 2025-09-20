@@ -64,7 +64,12 @@ import {
   User,
   ChevronRight,
   LogOut,
+  Video,
 } from "lucide-react";
+
+const handleVideoCall = () => {
+  window.open("https://meet.jit.si/vedic-ease-video-call", "_blank");
+};
 
 export const DoctorDashboard = () => {
   const navigate = useNavigate();
@@ -249,6 +254,7 @@ export const DoctorDashboard = () => {
     },
   ];
 
+  // Update the aiSuggestions array to include auto-scheduled therapy dates for specific problems
   const aiSuggestions = [
     {
       type: "scheduling",
@@ -266,6 +272,19 @@ export const DoctorDashboard = () => {
       message:
         "Emily Davis showing signs of treatment resistance - consider alternative approach",
       priority: "urgent",
+    },
+    // New: Auto-scheduled therapy for specific problems
+    {
+      type: "auto-schedule",
+      message:
+        "Patient Emily Davis (Sleep Disorders): Therapy session automatically scheduled for 25 Sep 2025 at 4:00 PM.",
+      priority: "high",
+    },
+    {
+      type: "auto-schedule",
+      message:
+        "Patient Michael Chen (Stress Management): Next therapy auto-scheduled for 26 Sep 2025 at 10:00 AM.",
+      priority: "medium",
     },
   ];
 
@@ -358,7 +377,28 @@ export const DoctorDashboard = () => {
                 )}
               </Button>
             </div>
-
+            {/* Video Call Button */}
+            <button
+              onClick={handleVideoCall}
+              style={{
+                backgroundColor: "#25D366",
+                border: "none",
+                borderRadius: "50%",
+                width: 44,
+                height: 44,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                marginLeft: "8px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                cursor: "pointer",
+                transition: "background 0.2s",
+              }}
+              title="Start Video Call"
+              aria-label="Start Video Call"
+            >
+              <Video style={{ color: "#fff" }} size={22} />
+            </button>
             {/* User Profile Dropdown */}
             <div className="flex items-center gap-2">
               <div className="text-right">
@@ -876,6 +916,8 @@ export const DoctorDashboard = () => {
                                 ? "bg-warning/20 text-warning"
                                 : suggestion.type === "treatment"
                                 ? "bg-primary/20 text-primary"
+                                : suggestion.type === "auto-schedule"
+                                ? "bg-success/20 text-success"
                                 : "bg-wellness-blue/20 text-wellness-blue"
                             }`}
                           >
@@ -883,6 +925,8 @@ export const DoctorDashboard = () => {
                               <AlertCircle className="w-4 h-4" />
                             ) : suggestion.type === "treatment" ? (
                               <Stethoscope className="w-4 h-4" />
+                            ) : suggestion.type === "auto-schedule" ? (
+                              <Calendar className="w-4 h-4" />
                             ) : (
                               <Calendar className="w-4 h-4" />
                             )}
@@ -901,7 +945,9 @@ export const DoctorDashboard = () => {
                                     : "bg-muted text-muted-foreground"
                                 }
                               >
-                                {suggestion.priority}
+                                {suggestion.type === "auto-schedule"
+                                  ? "Auto-Scheduled"
+                                  : suggestion.priority}
                               </Badge>
                               <Button size="sm" variant="outline">
                                 Accept

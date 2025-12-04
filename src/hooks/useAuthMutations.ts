@@ -120,6 +120,7 @@ export const useSignIn = () => {
 };
 
 // Sign Up Mutation
+// Sign Up Mutation
 export const useSignUp = () => {
   return useMutation({
     mutationFn: async ({
@@ -139,6 +140,7 @@ export const useSignUp = () => {
       console.log("useSignUp: Starting signUp...");
       const startTime = Date.now();
 
+      // Sign up user
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -157,12 +159,8 @@ export const useSignUp = () => {
         throw error;
       }
 
-      // Manually create user profile if signup was successful
-      if (data.user) {
-        console.log("useSignUp: Creating user profile...");
-        // Wait a moment for the session to be established
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
+      // Manually create user profile immediately after signup
+      if (data.user?.id) {
         const { error: profileError } = await supabase
           .from("user_profiles")
           .insert({
@@ -176,13 +174,10 @@ export const useSignUp = () => {
 
         if (profileError) {
           console.error(
-            "useSignUp: Error creating user profile:",
+            "useSignUp: Failed to create user profile:",
             profileError
           );
-          // Don't throw error, let the user sign up first
-          console.log(
-            "useSignUp: Profile creation failed, but user was created. Profile can be created later."
-          );
+          throw new Error("Failed to create user profile");
         }
       }
 
@@ -217,11 +212,9 @@ export const useSignUp = () => {
       toast.error(errorMessage);
     },
     retry: (failureCount, error) => {
-      // Don't retry on user already exists errors
       if (error.message?.includes("User already registered")) {
         return false;
       }
-      // Retry up to 2 times for network errors
       return failureCount < 2;
     },
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
